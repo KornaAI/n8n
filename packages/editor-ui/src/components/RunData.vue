@@ -65,7 +65,6 @@ import { isEqual, isObject } from 'lodash-es';
 import {
 	N8nBlockUi,
 	N8nButton,
-	N8nRoute,
 	N8nCallout,
 	N8nIconButton,
 	N8nInfoTip,
@@ -1253,10 +1252,6 @@ function onSearchClear() {
 	document.dispatchEvent(new KeyboardEvent('keyup', { key: '/' }));
 }
 
-function onExecutionHistoryNavigate() {
-	ndvStore.setActiveNodeName(null);
-}
-
 function getExecutionLinkLabel(task: ITaskMetadata): string | undefined {
 	if (task.parentExecution) {
 		return i18n.baseText('runData.openParentExecution', {
@@ -1436,7 +1431,7 @@ defineExpose({ enterEditMode });
 					</template>
 					<N8nIconButton
 						:icon="linkedRuns ? 'unlink' : 'link'"
-						class="linkRun"
+						:class="['linkRun', linkedRuns ? 'linked' : '']"
 						text
 						type="tertiary"
 						size="small"
@@ -1466,7 +1461,7 @@ defineExpose({ enterEditMode });
 		<slot v-if="!displaysMultipleNodes" name="before-data" />
 
 		<div v-if="props.calloutMessage" :class="$style.hintCallout">
-			<N8nCallout theme="secondary" data-test-id="run-data-callout">
+			<N8nCallout theme="info" data-test-id="run-data-callout">
 				<N8nText v-n8n-html="props.calloutMessage" size="small"></N8nText>
 			</N8nCallout>
 		</div>
@@ -1498,14 +1493,13 @@ defineExpose({ enterEditMode });
 
 		<div
 			v-else-if="
-				!hasRunError &&
 				hasNodeRun &&
 				!isSearchInSchemaView &&
 				((dataCount > 0 && maxRunIndex === 0) || search) &&
 				!isArtificialRecoveredEventItem &&
 				!displaysMultipleNodes
 			"
-			v-show="!editMode.enabled && !hasRunError"
+			v-show="!editMode.enabled"
 			:class="[$style.itemsCount, { [$style.muted]: paneType === 'input' && maxRunIndex === 0 }]"
 			data-test-id="ndv-items-count"
 		>
@@ -1630,11 +1624,6 @@ defineExpose({ enterEditMode });
 				<N8nText>
 					{{ i18n.baseText('runData.trimmedData.message') }}
 				</N8nText>
-				<N8nButton size="small" @click="onExecutionHistoryNavigate">
-					<N8nRoute :to="`/workflow/${workflowsStore.workflowId}/executions`">
-						{{ i18n.baseText('runData.trimmedData.button') }}
-					</N8nRoute>
-				</N8nButton>
 			</div>
 
 			<div v-else-if="hasNodeRun && isArtificialRecoveredEventItem" :class="$style.center">
